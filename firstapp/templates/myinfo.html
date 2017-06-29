@@ -1,0 +1,159 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <!-- note: request.user.username is also applicable
+    It is no necessary to use .profile because User has username field -->
+        <title>{{ request.user.user.username }}</title>
+        <link rel="stylesheet" href="{% static 'css/semantic.css' %}" media="screen" title="no title" charset="utf-8">
+        <link rel="stylesheet" href="{% static 'css/myinfo.css' %}" media="screen" title="no title">
+        <link href="https://fonts.googleapis.com/css?family=Oswald|Raleway" rel="stylesheet">
+
+    </head>
+    <body>
+        <script>
+            function myFunction() {
+                var x = document.getElementById('myDIV');
+                if (x.style.display === 'none') {
+                    x.style.display = 'block';
+                }
+                else {
+                    x.style.display = 'none';
+                }
+            }
+        </script>
+
+        <div class="ui inverted top fixed menu borderless red menu">
+            <div class="header item">
+                <div class="ui image">
+                    <a href="{% url 'index' %}?cat=all">
+                        <img src="{% static 'images/tenlogo.png' %}" alt="">
+                    </a>
+                </div>
+            </div>
+
+            <div class="right menu">
+                <div class="item">
+                    <h5 class="ui inverted header">
+                            <div class="ui mini circular image">
+                                <a href="{% url 'myinfo' %}">
+                                    {% if request.user.profile.avatar %}
+                                        <img src="/upload/{{ request.user.profile.avatar }}" alt="">
+                                    {% else %}
+                                        <img src="{% static 'images/default.png' %}" alt="">
+                                    {% endif %}
+                                </a>
+                            </div>
+
+                            <span>
+                                {% if request.user.profile.realname %}
+                                    {{ request.user.profile.realname }}
+                                {% else %}
+                                    {{ request.user.username }}
+                                {% endif %}
+                            </span>
+
+                        </h5>
+                </div>
+                <div class="item">
+
+                    <a href="{% url 'logout' %}" class="ui inverted circular button">Logout</a>
+
+                </div>
+            </div>
+        </div>
+        <div class="ui  raised container segments">
+            <div class="ui head basic segment" style="background-image: url({% static 'images/bg.png' %});">
+                <div class="ui circular image cover">
+                    {% if request.user.profile.avatar %}
+                        <img src="/upload/{{ request.user.profile.avatar }}" alt="">
+                    {% else %}
+                        <img src="{% static 'images/default.png' %}" alt="">
+                    {% endif %}
+                </div>
+
+
+
+            </div>
+            <div class="ui bottom inverted  six item attached menu">
+
+                <div class="active item">
+                    个人资料
+                </div>
+                <div class="item">
+                    <a href="{% url 'mycollection' %}">我赞过的</a>
+                </div>
+            </div>
+
+            <div class="ui butt segment">
+                <div class="ui basic very padded segment container info">
+                    <h5 style="color=grey;">
+                        {% if success_submit %}
+                            修改成功！
+                        {% endif %}
+                    </h5>
+                    <form class="ui error form"  action="{% url 'myinfo_update' %}" method="post" enctype="multipart/form-data">
+                        <div class="field">
+                            <label>
+                                姓名（提示：可以不填）
+                            </label>
+                            {{ form.realname }}
+                        </div>
+                        <div class="field">
+                            <label>
+                                性别
+                            </label>
+                            {{ form.sex }}
+                        </div>
+                        <div class="{{ form.password.errors|yesno:'error, ' }} field">
+                            <label>
+                                密码{{ form.password.errors|yesno:'（提示：密码太简单咯，请重新输入~）,（提示：修改密码后需要重新登录哦~)' }}
+                            </label>
+                            {{ form.password }}
+                        </div>
+                        <div class="{{ form.avatar.errors|yesno:'error, ' }} field">
+                            <label>
+                                修改头像{{ form.avatar.errors|yesno:'（提示：头像必须是图片哦，请重新上传~）, ' }}
+                            </label>
+                            {{ form.avatar }}
+                        </div>
+                        {% csrf_token %}
+                        <button class="ui inverted red right floated button" type="submit">修改资料</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <div class="ui container">
+            <button onclick="myFunction()" class="ui button" style="position:relative ;left: 50%;transform: translate(-50%,0);">作业说明</button>
+            <div id="myDIV" class="ui pointing label" style="display: none; width: 450px; margin-bottom: 100px; position:relative ;left: 50%;transform: translate(-50%,0);">
+                <h4>1. “个人资料”页面功能说明</h4>
+                <p style="text-indent:20px;">· 用户可就任意一项或几项个人信息进行单独或批量修改</p>
+                <p style="text-indent:20px;">· 导航栏默认显示注册名，如用户提交真实姓名，则显示真实姓名</p>
+                <p style="text-indent:20px;">· 为使“性别”选择更加符合逻辑，“性别”一栏较原始材料稍有改动</p>
+                <p style="text-indent:20px;">· django自带密码校验器validate_password将对输入密码进行校验</p>
+                <p style="text-indent:20px;">· 自定义校验器将对上传头像进行文件类型校验（限制为图片）</p>
+                <p style="text-indent:20px;">· 用户上传新头像后，旧头像的文件将被删除</p>
+                <p style="text-indent:20px;">· 未注册用户访问本页将重定向至首页（列表页）</p>
+
+                <h4>2. “我的收藏”页面功能说明</h4>
+                <p style="text-indent:20px;">· 显示用户赞过文章，用户取消点赞后将不再出现在此页面</p>
+                <p style="text-indent:20px;">· 可翻页，点击文章标题或图片即可跳转至相应文章详情页</p>
+                <p style="text-indent:20px;">· 未注册用户访问本页将重定向至首页（列表页）</p>
+
+                <h4>3. 其它功能说明</h4>
+                <p style="text-indent:20px;">· 用户注册后可自动生成UserProfile，无需后台手动添加</p>
+                <p style="text-indent:20px;">· “列表页”和“详情页”均可正确显示浏览量，点击某篇文章一次，则浏览量+1</p>
+                <p style="text-indent:20px;">· 修正了“列表页”和“详情页”显示点赞量的逻辑：</p>
+                <p style="text-indent:25px;">登录用户点赞某篇文章一次，则点赞量+1，点炸某篇文章一次，则点赞量-1</p>
+                <p></p>
+                <p style="text-indent:20px;">· 点击10MIN logo可方便跳转至首页（列表页）</p>
+                <p></p>
+
+            </div>
+
+        </div>
+    </body>
+</html>
